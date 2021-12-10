@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+import cmdstash
 
 class CommandStash:
     def __init__(self):
@@ -19,7 +20,7 @@ class CommandStash:
         parser.add_argument(
             '--version',
             action='version',
-            version='0.0.1',
+            version=cmdstash.__version__,
             help="Command version"
         )
         args = parser.parse_args(sys.argv[1:2])
