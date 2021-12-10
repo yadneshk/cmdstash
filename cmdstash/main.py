@@ -3,6 +3,7 @@ import sys
 
 import cmdstash
 
+
 class CommandStash:
     def __init__(self):
         parser = argparse.ArgumentParser(
@@ -44,17 +45,18 @@ class CommandStash:
 
         cmds_subparser = subparser.add_parser('cmds', help='add commands')
         cmds_subparser.add_argument('command', type=str)
-        cmds_subparser.add_argument('-t', '--tags', type=str, nargs='+', help='add command under a tag')
+        cmds_subparser.add_argument(
+            '-t', '--tags', type=str, nargs='+', help='add command under a tag'
+        )
 
         args = parser.parse_args(sys.argv[2:])
         if not args._get_kwargs():
             parser.print_help()
             exit(1)
         if hasattr(args, 'command'):
-            print("add new command",args.command, args.tags)
+            print("add new command", args.command, args.tags)
         elif hasattr(args, 'tag'):
             print("add new tag", args.tag)
-
 
     def list(self):
         parser = argparse.ArgumentParser(
@@ -69,11 +71,13 @@ class CommandStash:
             exit(1)
 
         subparser = parser.add_subparsers()
-        
-        tags_subparser = subparser.add_parser('tags', help='list tags')
+
+        subparser.add_parser('tags', help='list tags')
 
         cmds_subparser = subparser.add_parser('cmds', help='list commands')
-        cmds_subparser.add_argument('-t', '--tag', type=str, help='based on tags', nargs='+')
+        cmds_subparser.add_argument(
+            '-t', '--tag', type=str, help='based on tags', nargs='+'
+        )
 
         args = parser.parse_args(sys.argv[2:])
         if sys.argv[2] == 'tags':
