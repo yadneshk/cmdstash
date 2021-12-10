@@ -2,7 +2,7 @@ import argparse
 import sys
 
 
-class Command:
+class CommandStash:
     def __init__(self):
         parser = argparse.ArgumentParser(
             prog='COMMAND',
@@ -82,4 +82,4 @@ class Command:
 
 
 if __name__ == "__main__":
-    Command()
+    CommandStash()
