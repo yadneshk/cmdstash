@@ -3,37 +3,28 @@ import sqlite3
 
 TABLE_TAGS = """CREATE TABLE IF NOT EXISTS tags (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tags TEXT NOT NULL
+    tag_name STRING NOT NULL
     )"""
 
 TABLE_COMMANDS = """CREATE TABLE IF NOT EXISTS commands (
-    id INT PRIMARY KEY,
-    command TEXT NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    command TEXT NOT NULL,
+    tag_id INT NOT NULL,
+    FOREIGN KEY (tag_id) REFERENCES tags(id)
     )"""
+
+ENABLE_FOREIGN_KEY = """PRAGMA foreign_keys=ON"""
 
 
 class CommandStashDB:
     def __init__(self, table_name) -> None:
         self.db_name = "cmdstash.db"
-        self.table_name = table_name
-        self.conn = None
         self._create_tables()
 
     def _create_tables(self) -> None:
+        self._execute_query(ENABLE_FOREIGN_KEY)
         self._execute_query(TABLE_COMMANDS)
         self._execute_query(TABLE_TAGS)
-
-    def add_records(self, tag) -> None:
-        for t in tag:
-            query = "INSERT INTO {} ({}) VALUES ('{}')".format(
-                self.table_name, 'tags', t
-            )
-            self._execute_query(query)
-
-    def list_records(self) -> None:
-        query = "SELECT * from {}".format(self.table_name)
-        res = self._execute_query(query)
-        print(res)
 
     def _execute_query(self, query):
         record = []
@@ -48,6 +39,7 @@ class CommandStashDB:
             cursor.close()
         except sqlite3.Error as err:
             print(err)
+            exit(1)
         finally:
             if sqliteConn:
                 sqliteConn.close()

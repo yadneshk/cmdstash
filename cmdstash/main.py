@@ -2,89 +2,62 @@ import argparse
 import sys
 
 import cmdstash
+from cmdstash.utils import db
 
 
-class CommandStash:
-    def __init__(self):
-        parser = argparse.ArgumentParser(
-            prog='COMMAND',
-            description="CLI based utility to store commands",
-            usage="""
-            command <operation> -t [<tag>]
-            """
-        )
+def parse_args(args=None):
+    parser = argparse.ArgumentParser(
+        description='Command Stash: A CLI tool \
+            to manage your everyday commands'
+    )
+    parser.add_argument(
+        '-v', '--version', action='version', version=cmdstash.__version__
+    )
+    subparser = parser.add_subparsers(help='Manage commands')
 
-        parser.add_argument(
-            'command',
-            help='Subcommand'
-        )
-        parser.add_argument(
-            '--version',
-            action='version',
-            version=cmdstash.__version__,
-            help="Command version"
-        )
-        args = parser.parse_args(sys.argv[1:2])
+    create_add_subparser(subparser)
+    create_list_subparser(subparser)
 
-        if not hasattr(self, args.command):
-            print("Unrecognized arguments")
-            parser.print_help()
-            exit(1)
-        getattr(self, args.command)()
+    if not args:
+        parser.print_help()
+        exit(1)
 
-    def add(self):
-        parser = argparse.ArgumentParser(
-            description="Add new commands/tags",
-            usage="""
-            command add <subcommand> -t [<tag>..]
-            """
-        )
-        subparser = parser.add_subparsers()
-        tags_subparser = subparser.add_parser('tags', help='add tags')
-        tags_subparser.add_argument('tag', type=str, nargs='+')
+    return parser
 
-        cmds_subparser = subparser.add_parser('cmds', help='add commands')
-        cmds_subparser.add_argument('command', type=str)
-        cmds_subparser.add_argument(
-            '-t', '--tags', type=str, nargs='+', help='add command under a tag'
-        )
 
-        args = parser.parse_args(sys.argv[2:])
-        if not args._get_kwargs():
-            parser.print_help()
-            exit(1)
-        if hasattr(args, 'command'):
-            print("add new command", args.command, args.tags)
-        elif hasattr(args, 'tag'):
-            print("add new tag", args.tag)
+def create_add_subparser(subparser):
+    add_parser = subparser.add_parser('add')
+    add_subparser = add_parser.add_subparsers(help='Add help')
+    add_parser.set_defaults(parser='add')
 
-    def list(self):
-        parser = argparse.ArgumentParser(
-            description="List commands",
-            usage="""
-            command list -t [<tag>]
-            """
-        )
+    command_parser = add_subparser.add_parser('command')
+    command_parser.set_defaults(sub_parser='command')
+    command_parser.add_argument('cmd', type=str)
+    command_parser.add_argument('-t', '--tag', type=str)
 
-        if not sys.argv[2:]:
-            parser.print_help()
-            exit(1)
+    tag_parser = add_subparser.add_parser('tags')
+    tag_parser.set_defaults(sub_parser='tags')
+    tag_parser.add_argument('tags', type=str, nargs='+')
 
-        subparser = parser.add_subparsers()
 
-        subparser.add_parser('tags', help='list tags')
+def create_list_subparser(subparser):
+    list_parser = subparser.add_parser('list')
+    list_subparser = list_parser.add_subparsers()
+    list_parser.set_defaults(parser='list')
 
-        cmds_subparser = subparser.add_parser('cmds', help='list commands')
-        cmds_subparser.add_argument(
-            '-t', '--tag', type=str, help='based on tags', nargs='+'
-        )
+    command_parser = list_subparser.add_parser('command')
+    command_parser.set_defaults(sub_parser='command')
+    command_parser.add_argument('-t', '--tags', type=str, nargs='+')
 
-        args = parser.parse_args(sys.argv[2:])
-        if sys.argv[2] == 'tags':
-            print("list all tags")
-        elif sys.argv[2] == 'cmds':
-            print("print all cmds", args.tag)
+    tags_parser = list_subparser.add_parser('tags')
+    tags_parser.set_defaults(sub_parser='tags')
+
+
+def main(argv=None):
+    parser = parse_args(argv)
+    args = parser.parse_args()
+    db.process_arguments(args)
 
 
 if __name__ == "__main__":
-    CommandStash()
+    sys.exit(main(sys.argv[1:]))
