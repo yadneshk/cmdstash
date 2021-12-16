@@ -1,4 +1,5 @@
 from cmdstash.db.dbcore import CommandStashDB
+from cmdstash.db.dbcore import TABLE_TAGS, TABLE_COMMANDS
 
 
 def process_arguments(arguments=None):
@@ -12,13 +13,15 @@ def add_records(args):
     if getattr(args, 'sub_parser') == "command":
         if getattr(args, 'tag') is not None:
             get_tag_id = (
-                'SELECT id from tags where '
-                'tag_name="{}"'.format(args.tag)
+                'SELECT id from {} where '
+                'tag_name="{}"'.format(TABLE_TAGS, args.tag)
             )
             query = (
-                'INSERT INTO commands (command, tag_id) '
-                'VALUES ("{}",({}))'.format(args.cmd, get_tag_id)
-            )          
+                'INSERT INTO {} (command, tag_id) '
+                'VALUES ("{}",({}))'.format(
+                    TABLE_COMMANDS, args.cmd, get_tag_id
+                )
+            )
         else:
             query = (
                 'INSERT INTO commands (command) '
@@ -28,24 +31,24 @@ def add_records(args):
         tags_list = validate_tags(args.tags)
         for tag in tags_list:
             query = (
-                'INSERT INTO tags (tag_name) '
-                'VALUES ("{}")'.format(tag)
+                'INSERT INTO {} (tag_name) '
+                'VALUES ("{}")'.format(TABLE_TAGS, tag)
             )
-    CommandStashDB('tags')._execute_query(query)
+    CommandStashDB()._execute_query(query)
 
 
 def list_records(args):
     if getattr(args, 'sub_parser') == "command":
         query = (
-            'SELECT * from commands'
+            'SELECT * from {}'.format(TABLE_COMMANDS)
         )
         # if args.tags:
         #     query += ' WHERE tag_name={}'.format(args.tags)
     elif getattr(args, 'sub_parser') == "tags":
         query = (
-            'SELECT * from tags'
+            'SELECT * from {}'.format(TABLE_TAGS)
         )
-    print(CommandStashDB('tags')._execute_query(query))
+    print(CommandStashDB()._execute_query(query))
 
 
 def validate_tags(tags):

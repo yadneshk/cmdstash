@@ -54,6 +54,8 @@ def create_list_subparser(subparser):
 
 
 def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
     parser = parse_args(argv)
     args = parser.parse_args()
     db.process_arguments(args)
