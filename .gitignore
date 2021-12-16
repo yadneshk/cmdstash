@@ -1,6 +1,7 @@
 *.egg*
 *.pyc
 *.db
+.idea
 
 # Development environment files
 .cmdstash
