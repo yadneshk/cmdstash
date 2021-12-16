@@ -47,7 +47,7 @@ def create_list_subparser(subparser):
 
     command_parser = list_subparser.add_parser('command')
     command_parser.set_defaults(sub_parser='command')
-    command_parser.add_argument('-t', '--tags', type=str, nargs='+')
+    command_parser.add_argument('-t', '--tags', type=str)
 
     tags_parser = list_subparser.add_parser('tags')
     tags_parser.set_defaults(sub_parser='tags')
