@@ -27,6 +27,7 @@ def add_records(args):
                 'INSERT INTO {} (command) '
                 'VALUES ("{}")'.format(TABLE_COMMANDS, args.cmd)
             )
+        CommandStashDB()._execute_query(query)
     elif getattr(args, 'sub_parser') == "tags":
         tags_list = validate_tags(args.tags)
         for tag in tags_list:
@@ -34,7 +35,7 @@ def add_records(args):
                 'INSERT INTO {} (tag_name) '
                 'VALUES ("{}")'.format(TABLE_TAGS, tag)
             )
-    CommandStashDB()._execute_query(query)
+            CommandStashDB()._execute_query(query)
 
 
 def list_records(args):
@@ -45,18 +46,26 @@ def list_records(args):
                 'WHERE tag_name="{}"'.format(TABLE_TAGS, args.tags)
             )
             query = (
-                'SELECT * FROM {} WHERE '
+                'SELECT command FROM {} WHERE '
                 'tag_id=({})'.format(TABLE_COMMANDS, get_tag_id)
             )
         else:
             query = (
-                'SELECT * FROM {}'.format(TABLE_COMMANDS)
+                'SELECT command,tags.tag_name FROM '
+                '{} INNER JOIN {} on '
+                'tags.id=commands.tag_id'.format(
+                    TABLE_COMMANDS, TABLE_TAGS
+                )
             )
     elif getattr(args, 'sub_parser') == "tags":
         query = (
             'SELECT * FROM {}'.format(TABLE_TAGS)
         )
-    print(CommandStashDB()._execute_query(query))
+    res = CommandStashDB()._execute_query(query)
+    if res is None:
+        print("No {} found".format(getattr(args, 'sub_parser')))
+        exit(0)
+    print(res)
 
 
 def validate_tags(tags):
