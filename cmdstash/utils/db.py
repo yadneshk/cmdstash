@@ -1,6 +1,8 @@
 from cmdstash.db.dbcore import CommandStashDB
 from cmdstash.db.dbcore import TABLE_TAGS, TABLE_COMMANDS
 
+from cmdstash.utils.format_output import pretty_output
+
 
 def process_arguments(arguments=None):
     if getattr(arguments, 'parser') == "list":
@@ -39,6 +41,7 @@ def add_records(args):
 
 
 def list_records(args):
+    columns = []
     if getattr(args, 'sub_parser') == "command":
         if getattr(args, 'tags') is not None:
             get_tag_id = (
@@ -49,6 +52,7 @@ def list_records(args):
                 'SELECT command FROM {} WHERE '
                 'tag_id=({})'.format(TABLE_COMMANDS, get_tag_id)
             )
+            columns.append("Commands")
         else:
             query = (
                 'SELECT command,tags.tag_name FROM '
@@ -57,15 +61,18 @@ def list_records(args):
                     TABLE_COMMANDS, TABLE_TAGS
                 )
             )
+            columns.append("Commands")
+            columns.append("Tags")
     elif getattr(args, 'sub_parser') == "tags":
         query = (
-            'SELECT * FROM {}'.format(TABLE_TAGS)
+            'SELECT tag_name FROM {}'.format(TABLE_TAGS)
         )
+        columns.append("Tags")
     res = CommandStashDB()._execute_query(query)
     if res is None:
         print("No {} found".format(getattr(args, 'sub_parser')))
         exit(0)
-    print(res)
+    pretty_output(columns, res)
 
 
 def validate_tags(tags):
